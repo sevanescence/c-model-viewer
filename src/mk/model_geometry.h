@@ -1,9 +1,6 @@
 #ifndef GEOMETRY_H
 #define GEOMETRY_H
 
-#define mklog(message) {printf(message); fflush(stdout);}
-#define mklog_fmt(message, ...) { printf(message"\n", __VA_ARGS__); fflush(stdout); }
-
 #include <stdint.h>
 #include <stdlib.h>
 #include <stddef.h>
@@ -17,6 +14,7 @@
 #include <assimp/material.h>
 #include <string.h>
 
+#include "logging.h"
 #include "shader.h"
 #include "vec.h"
 
