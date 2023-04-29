@@ -1,0 +1,15 @@
+# project-specific ignores
+compile_flags.txt
+dump.txt
+downloads/
+src/tmp.txt
+src/tmp1.txt
+# model i stole for testing 
+backpack/
+test/
+
+# redundant
+program.exe
+
+# vscode configurations
+.vscode/
