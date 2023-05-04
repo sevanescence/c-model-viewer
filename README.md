@@ -17,6 +17,8 @@ clang -o program.exe src/main.c -Iinclude/ -Llibs/ -lglfw3_mt -luser32 -lgdi32 -
 ```
 and obviously whatever debugging or optimization options you wish to use. Any compiler options should work fine with this program.
 
+> `Use -DDEBUG flag for mklog messages. If not enabled, mklog does nothing.`
+
 > There should be no arbitrary FPS caps as VSync is disabled, but let me know otherwise.
 
 ### Linux/MacOS
