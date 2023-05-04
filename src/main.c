@@ -75,36 +75,6 @@ int main(void) {
 
 
 
-    // assimp test
-    // const struct aiScene *scene = aiImportFile("./backpack/backpack.obj", aiProcess_Triangulate | aiProcess_FlipUVs);
-    // if (!scene || scene->mFlags & AI_SCENE_FLAGS_INCOMPLETE || !scene->mRootNode) {
-    //     fprintf(stderr, "Assimp error: %s\n", aiGetErrorString());
-    //     fflush(stderr);
-    //     abort();
-    // }
-
-    // Vec(Mesh) meshes = VEC_INIT;
-
-    // for (unsigned int i = 0; i < scene->mRootNode->mNumMeshes; ++i) {
-    //     struct aiMesh *mesh = scene->mMeshes[scene->mRootNode->mMeshes[i]];
-        
-    //     Vec(ModelVertex) vertices = VEC_INIT;
-    //     Vec(uint32_t) indices = VEC_INIT;
-    //     Vec(Texture) textures = VEC_INIT;
-
-    //     for (unsigned int j = 0; j < mesh->mNumVertices; ++i) {
-    //         ModelVertex vertex;
-    //         vertex.position[0] = mesh->mVertices[i].x;
-    //         vertex.position[1] = mesh->mVertices[i].y;
-    //         vertex.position[2] = mesh->mVertices[i].z;
-    //         if (mesh->mTextureCoords[0]) {
-    //             vertex.tex_coords[0] = mesh->mTextureCoords[0][i].x;
-    //             vertex.tex_coords[1] = mesh->mTextureCoords[0][i].y;
-    //         }
-    //         VEC_PUSH_BACK(ModelVertex, &vertices, vertex);
-    //     }
-    // }
-
     Model model = {};
     model_init(&model, "./teepee/teepee.glb");
     printf("%d\n", 69);
@@ -114,7 +84,6 @@ int main(void) {
         mesh_m_configure_gl_data(&model.meshes.data[i]);
     }
     fflush(stdout);
-    // end of assimp test
 
 
 
@@ -154,7 +123,7 @@ int main(void) {
         static float z = 0.0f;
         static float y = 0.0f;
         static float x = 0.0f;
-        const float mult = 0.50f;
+        const float mult = 0.005f;
         if (glfwGetKey(context, GLFW_KEY_W) == GLFW_PRESS) {
             z += mult;
         }
