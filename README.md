@@ -3,7 +3,7 @@ Model viewing (and potentially sculpting) program written in C on OpenGL with GL
 
 #### TODO
 - [ ] Finish README
-- [ ] Model Textures
+- [x] Model Textures
 - [ ] Model exporting
 - [ ] Voxel sculpting
 - [ ] Model sculpting

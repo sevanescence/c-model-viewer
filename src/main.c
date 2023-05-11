@@ -2,6 +2,8 @@
 #include <stdio.h>
 #include <stdlib.h>
 
+#include <direct.h>
+
 #define GLFW_INCLUDE_NONE
 #include <GLFW/glfw3.h>
 #include <glad/glad.h>
@@ -15,8 +17,11 @@
 #include <assimp/postprocess.h>
 
 #include "mk/model_geometry.h"
+#include "mk/resources.h"
 #include "mk/callbacks.h"
 #include "mk/shader.h"
+
+#include "mk/logging.h"
 
 /// --------------- FUTURE PLANS ---------------
 
@@ -76,38 +81,113 @@ int main(void) {
 
 
     Model model = {};
-    model_init(&model, "./teepee/teepee.glb");
-    printf("%d\n", 69);
-    fflush(stdout);
-    printf("%d\n", model.meshes.data[0].VAO);
+    model_init(&model, "./resources/horse/scene.gltf");
     for (unsigned int i = 0; i < model.meshes.size; ++i) {
         mesh_m_configure_gl_data(&model.meshes.data[i]);
     }
-    fflush(stdout);
+
+    // Model EARTH = {};
+    // model_init(&EARTH, "./sludge/earth.glb");
+    // for (unsigned int i = 0; i < EARTH.meshes.size; ++i) {
+    //     mesh_m_configure_gl_data(&EARTH.meshes.data[i]);
+    // }
+    // GLuint earth_texture;
+    // {
+
+    // }
+
+    /// TODO: Load this elsewhere.
+    Shader *default_shader = NULL;
+    {
+        Resource vertex_src = mk_get_resource("vertex.glsl");
+        Resource fragment_src = mk_get_resource("fragment.glsl");
+
+        default_shader = shader_create_from_sources(vertex_src.data, fragment_src.data);
+
+        mk_resource_destruct(&vertex_src);
+        mk_resource_destruct(&fragment_src);
+    }
+
+    GLuint texture;
+    // {
+    //     glGenTextures(1, &texture);
+    //     glBindTexture(GL_TEXTURE_2D, texture);
+
+    //     // WE LOVE COPYING AND PASTING CODE
+    //     // set the texture wrapping/filtering options (on the currently bound texture object)
+    //     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);	
+    //     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+    //     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
+    //     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+    //     // load and generate the texture
+    //     int width, height, nrChannels;
+        
+    //     unsigned char *data = stbi_load("./sludge/terrezed_atlas.png", &width, &height, &nrChannels, 0);
+    //     if (data) {
+    //         glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, width, height, 0, GL_RGBA, GL_UNSIGNED_BYTE, data);
+    //         glGenerateMipmap(GL_TEXTURE_2D);
+            
+    //     } else {
+    //         fprintf(stderr, "Image read failure.\n");
+    //         fflush(stderr);
+    //         abort();
+    //     }
+
+    //     stbi_image_free(data);
+        
+    // }
 
 
 
-    // TODO: Move to resources folder, write resources asset manager
-    const char *vertex_src = ""
-        "#version 460 core\n"
-        "layout (location = 0) in vec3 aPos;\n"
-        "layout (location = 1) in vec3 aNor;\n"
-        "layout (location = 2) in vec2 aTex;\n"
-        "out vec4 color;\n"
-        "uniform mat4 projection;\n"
-        "out vec2 TexCoord;\n"
-        "void main() { color = vec4(aTex.xyx, 1.0f); TexCoord = aTex; gl_Position = projection * vec4(aPos.xyz, 1.0f); }";
-    const char *fragment_src = ""
-        "#version 460 core\n"
-        "out vec4 FragColor;\n"
-        "in vec4 color;\n"
-        "in vec2 TexCoord;\n"
-        "uniform sampler2D o_texture;\n"
-        "void main() { FragColor = vec4(TexCoord.xy, 0.0f, 1.0f); }";
-    Shader *default_shader = shader_create_from_sources(vertex_src, fragment_src);
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    // TODO: Just get UI working and import models with external atlasses!
+    
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
     
     while (!glfwWindowShouldClose(context)) {
-        glClearColor(0.5, 0.3, 0.7, 1.0);
+        glClearColor(0.3, 0.3, 0.35, 1.0);
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
         #define radians(deg) (deg*(M_PI/180))
@@ -116,14 +196,14 @@ int main(void) {
         glfwGetWindowSize(context, &width, &height);
 
         mat4 projection = GLM_MAT4_IDENTITY;
-        glm_perspective(radians(60.0f), ((float)width)/height, 0.1f, 1000.0f, projection);
+        glm_perspective(radians(60.0f), ((float)width)/height, 0.1f, 100000.0f, projection);
         //glm_ortho(0.0f, 32.0f,0.0f, 32.0f, 0.1f, 100.0f, projection);
 
         // temporary controls for projection and model testing. TODO: Replace with camera control manager
-        static float z = 0.0f;
-        static float y = 0.0f;
+        static float z = -2.0f;
+        static float y = -1.0f;
         static float x = 0.0f;
-        const float mult = 0.005f;
+        const float mult = 0.0005;
         if (glfwGetKey(context, GLFW_KEY_W) == GLFW_PRESS) {
             z += mult;
         }
@@ -145,15 +225,51 @@ int main(void) {
 
         // end of temporary controls
 
-        mat4 model_mat = GLM_MAT4_IDENTITY;
-        glm_translate(model_mat, (vec3){ x, y, z });
+        // // Terrezed BIG
 
+        // // mat4 model_mat = GLM_MAT4_IDENTITY;
+        // // glm_translate(model_mat, (vec3){ x, y, z });
+        // // glm_rotate(model_mat, radians(-90), (vec3){ 1, 0, 0 });
+        // // double m = glfwGetTime() / 1000 * 600 + 1;
+        // // glm_scale(model_mat, (vec3){ m, m, m });
+
+        // // glm_mul(projection, model_mat, projection);
+
+        // // glUseProgram(default_shader->id);
+        // // glUniformMatrix4fv(glGetUniformLocation(default_shader->id, "projection"), 1, GL_FALSE, projection[0]);
+
+        // // model_draw(&model, default_shader);
+
+        // Terrezed
+
+        mat4 model_mat = GLM_MAT4_IDENTITY;
+        glm_mat4_identity(model_mat);
+        glm_translate(model_mat, (vec3){ x, y, z });
+        //glm_rotate(model_mat, radians(-90), (vec3){ 1, 0, 0 });
+        glm_rotate(model_mat, radians(-90), (vec3){ 0, 1, 0 });
+        glm_scale(model_mat, (vec3){ 0.02, 0.02, 0.02 });
+
+        glm_perspective(radians(60.0f), ((float)width)/height, 0.01f, 10000.0f, projection);
         glm_mul(projection, model_mat, projection);
 
         glUseProgram(default_shader->id);
         glUniformMatrix4fv(glGetUniformLocation(default_shader->id, "projection"), 1, GL_FALSE, projection[0]);
-
+        
         model_draw(&model, default_shader);
+
+        // // EARTH
+
+        // // glm_mat4_identity(model_mat);
+        // // glm_translate(model_mat, (vec3){ x, y, z - 1200 * 5 });
+        // // glm_scale(model_mat, (vec3){ 5, 5, 5 });
+
+        // // glm_perspective(radians(60.0f), ((float)width)/height, 0.1f, 100000.0f, projection);
+        // // glm_mul(projection, model_mat, projection);
+
+        // // glUseProgram(default_shader->id);
+        // // glUniformMatrix4fv(glGetUniformLocation(default_shader->id, "projection"), 1, GL_FALSE, projection[0]);
+        
+        // // model_draw(&EARTH, default_shader);
         
         glfwPollEvents();
         glfwSwapBuffers(context);
