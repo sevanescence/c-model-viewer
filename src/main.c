@@ -1,3 +1,4 @@
+#include <corecrt_math_defines.h>
 #include <math.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -57,6 +58,7 @@ int main(void) {
     glfwMakeContextCurrent(context);
     glfwSetKeyCallback(context, key_callback);
     glfwSetFramebufferSizeCallback(context, framebuffer_size_callback);
+    glfwSetScrollCallback(context, scroll_callback);
 
     // GLAD initialization
     printf("Events loaded. Loading GLAD...\n");
@@ -94,7 +96,7 @@ int main(void) {
     // GLuint earth_texture;
     // {
 
-    // }
+    // } 
 
     /// TODO: Load this elsewhere.
     Shader *default_shader = NULL;
@@ -183,7 +185,8 @@ int main(void) {
 
 
 
-
+    /// Initialize Nuklear
+    
 
     
     while (!glfwWindowShouldClose(context)) {
@@ -200,28 +203,83 @@ int main(void) {
         //glm_ortho(0.0f, 32.0f,0.0f, 32.0f, 0.1f, 100.0f, projection);
 
         // temporary controls for projection and model testing. TODO: Replace with camera control manager
-        static float z = -2.0f;
-        static float y = -1.0f;
+        static float z = 0.0f;
+        static float y = 0.0f;
         static float x = 0.0f;
-        const float mult = 0.0005;
-        if (glfwGetKey(context, GLFW_KEY_W) == GLFW_PRESS) {
-            z += mult;
-        }
-        if (glfwGetKey(context, GLFW_KEY_S) == GLFW_PRESS) {
-            z -= mult;
-        }
+        static float mult = 5;
+        static float radius = 5;
+
+        static float last_frame = 0.0f;
+        float current_frame = glfwGetTime();
+        const float delta_time = current_frame - last_frame;
+        last_frame = current_frame;
+        // if (glfwGetKey(context, GLFW_KEY_W) == GLFW_PRESS) {
+        //     z += mult * delta_time;
+        // }
+        // if (glfwGetKey(context, GLFW_KEY_S) == GLFW_PRESS) {
+        //     z -= mult * delta_time;
+        // }
+        // if (glfwGetKey(context, GLFW_KEY_A) == GLFW_PRESS) {
+        //     x += mult * delta_time;
+        // }
+        // if (glfwGetKey(context, GLFW_KEY_D) == GLFW_PRESS) {
+        //     x -= mult * delta_time;
+        // }
+
+        radius += mk__scroll_multiplier;
+        mk__scroll_multiplier = 0;
+        // if (glfwGetKey(context, GLFW_KEY_LEFT_SHIFT) == GLFW_PRESS) {
+        //     y += mult * delta_time;
+        // }
+        // if (glfwGetKey(context, GLFW_KEY_SPACE) == GLFW_PRESS) {
+        //     y -= mult * delta_time;
+        // }
+
+        // if (glfwGetKey(context, GLFW_KEY_W) == GLFW_PRESS) {
+        //     radius -= mult * delta_time;
+        // }
+        // if (glfwGetKey(context, GLFW_KEY_S) == GLFW_PRESS) {
+        //     radius += mult * delta_time;
+        // }
+
+        static float azimuth_angle = 0.0f;
+        static float polar_angle = 0.0f;
+        static float angle_multiplier = 180.0f;
+        
         if (glfwGetKey(context, GLFW_KEY_A) == GLFW_PRESS) {
-            x += mult;
+            azimuth_angle += remainder(radians(angle_multiplier * delta_time), 2 * M_PI);
         }
         if (glfwGetKey(context, GLFW_KEY_D) == GLFW_PRESS) {
-            x -= mult;
+            azimuth_angle -= remainder(radians(angle_multiplier * delta_time), 2 * M_PI);
         }
-        if (glfwGetKey(context, GLFW_KEY_LEFT_SHIFT) == GLFW_PRESS) {
-            y += mult;
-        }
-        if (glfwGetKey(context, GLFW_KEY_SPACE) == GLFW_PRESS) {
-            y -= mult;
-        }
+
+        x = radius * cos(azimuth_angle) * cos(polar_angle);
+        y = radius * sin(polar_angle);
+        z = radius * cos(polar_angle) * sin(azimuth_angle);
+        
+        vec3 camera_pos = (vec3){ x, y, z };
+
+        mat4 view = GLM_MAT4_IDENTITY;
+        glm_lookat((vec3){  }, (vec3){ x, 0, z }, (vec3){ 0.0f, 1.0f, 0.0f }, view);
+
+        
+
+        // vec3 camera_target = { 0.0f, 0.0f, 0.0f };
+        // vec3 camera_direction = GLM_VEC3_ZERO_INIT;
+        // glm_vec3_sub(camera_target, camera_pos, camera_direction);
+        // glm_normalize(camera_direction);
+
+        // vec3 camera_right = GLM_VEC3_ZERO_INIT;
+        // {
+        //     vec3 up = { 0, 1, 0 };
+        //     glm_cross(up, camera_direction, camera_right);
+        //     glm_normalize(camera_right);
+        // }
+
+        // vec3 camera_up = GLM_VEC3_ZERO_INIT;
+        // glm_cross(camera_direction, camera_right, camera_up);
+
+        
 
         // end of temporary controls
 
@@ -242,14 +300,20 @@ int main(void) {
 
         // Terrezed
 
+        vec3 model_location = (vec3){ 0, 0, 0 };
+        glm_vec3_add(model_location, camera_pos, model_location);
+
         mat4 model_mat = GLM_MAT4_IDENTITY;
         glm_mat4_identity(model_mat);
-        glm_translate(model_mat, (vec3){ x, y, z });
+        glm_translate(model_mat, model_location);
         //glm_rotate(model_mat, radians(-90), (vec3){ 1, 0, 0 });
+        //glm_rotate(model_mat, radians(-90), (vec3){ 0, 0, 1 });
         glm_rotate(model_mat, radians(-90), (vec3){ 0, 1, 0 });
-        glm_scale(model_mat, (vec3){ 0.02, 0.02, 0.02 });
+        glm_scale(model_mat, (vec3){ .2, .2, .2 });
+        
 
         glm_perspective(radians(60.0f), ((float)width)/height, 0.01f, 10000.0f, projection);
+        glm_mul(projection, view, projection);
         glm_mul(projection, model_mat, projection);
 
         glUseProgram(default_shader->id);

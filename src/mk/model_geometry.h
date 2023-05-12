@@ -248,6 +248,8 @@ Mesh model_m_process_mesh(Model *model, struct aiMesh *ai_mesh, const struct aiS
     }
     mklog("Polygons processed.\n")
 
+    /// TODO: This is probably leaking VRAM because different mesh nodes can use the same texture.
+    /// Load it before loading the meshes instead. Or don't, this is going in the trash anyway.
     if (ai_mesh->mMaterialIndex >= 0) {
         struct aiMaterial *material = scene->mMaterials[ai_mesh->mMaterialIndex];
 

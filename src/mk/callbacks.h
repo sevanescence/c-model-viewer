@@ -32,6 +32,12 @@ void key_callback(GLFWwindow *window, int key, int scancode, int action, int mod
     }
 }
 
+static double mk__scroll_multiplier = 0.0;
+
+void scroll_callback(GLFWwindow *window, double x_offset, double y_offset) {
+    mk__scroll_multiplier = y_offset;
+}
+
 void framebuffer_size_callback(GLFWwindow *window, int width, int height) {
     glViewport(0, 0, width, height);
 }
